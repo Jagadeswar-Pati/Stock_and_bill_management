@@ -1,0 +1,313 @@
+:root {
+  --page-width: 210mm;
+  --page-height: 297mm;
+  --margin: 12mm;
+  --accent: #1e88e5;
+  --muted: #666;
+  --paper-bg: #fff;
+  --app-bg: #f3f5f7;
+  --page-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+}
+
+html, body {
+  margin: 0;
+  height: 100%;
+  font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+  background: var(--app-bg);
+}
+
+.container {
+  padding: 24px;
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.controls {
+  width: 360px;
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  background: #fff;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: var(--page-shadow);
+}
+
+.controls h2 {
+  margin: 6px 0 12px;
+  font-size: 18px;
+}
+
+.field {
+  margin-bottom: 10px;
+}
+
+.field label {
+  display: block;
+  font-weight: 600;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.field input, .field textarea, .field select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.small {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn.secondary {
+  background: #555;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.page {
+  width: var(--page-width);
+  min-height: var(--page-height);
+  background: var(--paper-bg);
+  box-shadow: var(--page-shadow);
+  padding: 16mm 14mm;
+  box-sizing: border-box;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+@media print {
+  body { background: transparent; }
+  .controls { display: none; }
+  .page { box-shadow: none; border-radius: 0; margin: 0; padding: 12mm; page-break-after: always; }
+}
+
+.invoice-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 12px;
+}
+
+.brand { display: flex; gap: 12px; align-items: center; }
+.brand img { height: 72px; width: 72px; object-fit: contain; background: #fff; border-radius: 6px; border: 1px solid #eee; }
+.brand h1 { margin: 0; font-size: 20px; }
+.company-details { font-size: 13px; color: var(--muted); }
+.invoice-meta { text-align: right; font-size: 13px; }
+.addresses { display: flex; gap: 18px; margin-top: 16px; }
+.addr { flex: 1; font-size: 13px; }
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+  font-size: 13px;
+}
+
+.table th, .table td {
+  padding: 6px;
+  border-bottom: 1px solid #eee;
+  text-align: center;
+}
+
+.table th {
+  background: #fafafa;
+  font-weight: 700;
+}
+
+.num { text-align: right; }
+
+.totals {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.totals .box { width: 320px; }
+
+.totals .row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  font-size: 14px;
+}
+
+.totals .row.total {
+  font-weight: 800;
+  font-size: 16px;
+  border-top: 2px solid #eee;
+  padding-top: 10px;
+  margin-top: 6px;
+}
+
+.footer {
+  margin-top: 24px;
+  font-size: 13px;
+  color: var(--muted);
+  display: flex;
+  justify-content: space-between;
+}
+
+.add-line {
+  background: #f4f6f8;
+  border: 1px dashed #ddd;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 8px;
+  display: inline-block;
+}
+:root {
+  --page-width: 210mm;
+  --page-height: 297mm;
+  --margin: 12mm;
+  --accent: #1e88e5;
+  --muted: #666;
+  --paper-bg: #fff;
+  --app-bg: #f3f5f7;
+  --page-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+}
+
+html, body {
+  margin: 0;
+  height: 100%;
+  font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+  background: var(--app-bg);
+}
+
+.container {
+  padding: 24px;
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  justify-content: center;
+}
+#itemsContainer input {
+  padding: 4px;
+}
+#itemsContainer div {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+  align-items: center;
+}
+
+.controls {
+  width: 360px;
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  background: #fff;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: var(--page-shadow);
+}
+
+.controls h2 { margin: 6px 0 12px; font-size: 18px; }
+
+.field { margin-bottom: 10px; }
+.field label { display: block; font-weight: 600; font-size: 13px; margin-bottom: 6px; }
+.field input, .field textarea, .field select {
+  width: 100%; padding: 8px; border: 1px solid #ddd;
+  border-radius: 6px; font-size: 14px;
+}
+
+.small { display: flex; gap: 8px; }
+
+.btn {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+.btn.secondary { background: #555; }
+.muted { color: var(--muted); font-size: 13px; }
+
+.page {
+  width: var(--page-width);
+  min-height: var(--page-height);
+  background: var(--paper-bg);
+  box-shadow: var(--page-shadow);
+  padding: 16mm 14mm;
+  box-sizing: border-box;
+  border-radius: 6px;
+}
+
+@media print {
+  body { background: transparent; }
+  .controls { display: none; }
+  .page { box-shadow: none; border-radius: 0; margin: 0; padding: 12mm; }
+}
+
+.invoice-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 12px;
+}
+
+.brand { display: flex; gap: 12px; align-items: center; }
+.brand img { height: 72px; width: 72px; object-fit: contain; background: #fff; border-radius: 6px; border: 1px solid #eee; }
+.brand h1 { margin: 0; font-size: 20px; }
+.company-details { font-size: 13px; color: var(--muted); }
+.invoice-meta { text-align: right; font-size: 13px; }
+.addresses { display: flex; gap: 18px; margin-top: 16px; }
+.addr { flex: 1; font-size: 13px; }
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+  font-size: 13px;
+}
+.table th, .table td {
+  padding: 6px;
+  border-bottom: 1px solid #eee;
+  text-align: center;
+}
+.table th { background: #fafafa; font-weight: 700; }
+.num { text-align: right; }
+
+.totals { margin-top: 12px; display: flex; justify-content: flex-end; }
+.totals .box { width: 320px; }
+.totals .row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 14px; }
+.totals .row.total {
+  font-weight: 800;
+  font-size: 16px;
+  border-top: 2px solid #eee;
+  padding-top: 10px;
+  margin-top: 6px;
+}
+
+.footer { margin-top: 24px; font-size: 13px; color: var(--muted); display: flex; justify-content: space-between; }
+.add-line {
+  background: #f4f6f8;
+  border: 1px dashed #ddd;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 8px;
+  display: inline-block;
+}

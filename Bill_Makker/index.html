@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Invoice Generator - A4 Printable</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+  <div class="controls">
+    <h2>Invoice Dashboard</h2>
+
+    <div class="field"><label>Upload Logo</label><input id="logoInput" type="file" accept="image/*"></div>
+    <div class="field"><label>Business Name</label><input id="fromName" type="text" value="Innovative Hub"></div>
+    <div class="field"><label>Business Details</label><textarea id="fromDetails" rows="3">
+Near Gothapatana Square , Malipada ,
+ Bhubaneswar ,  
+Odisha, India - 751003
+ GSTIN: 21HSRPP8072D1ZD
+Email: innovativehubofficial@gmail.com</textarea></div>
+
+    <div class="field"><label>Client Name</label><input id="clientName" type="text" value="Client Name"></div>
+    <div class="field"><label>Client Details</label><textarea id="clientDetails" rows="3">Client Address
+City, State</textarea></div>
+
+    <div class="small">
+      <div style="flex:1"><label>Invoice No.</label><input id="invoiceNo" type="text" value="INV-001"></div>
+      <div style="width:120px"><label>Date</label><input id="invoiceDate" type="text"></div>
+    </div>
+
+    <hr>
+
+    <h3 style="font-size:15px;margin:6px 0">Items</h3>
+    <div id="itemsContainer"></div>
+    <button class="btn" id="addRow">+ Add Item</button>
+    <button class="btn secondary" id="clearRows" style="margin-left:8px">Clear</button>
+
+    <hr>
+    <div class="field">
+      <label>GST Mode</label>
+      <select id="gstMode">
+        <option value="global" selected>Global GST</option>
+        <option value="individual">Individual GST</option>
+      </select>
+    </div>
+
+    <div class="field"><label>Global Tax (%)</label><input id="taxPercent" type="number" value="18"></div>
+    <div class="field"><label>Discount (₹)</label><input id="discount" type="number" value="0"></div>
+
+    <div class="field"><label>Bank Details</label><textarea id="bankDetails" rows="3">Bank: ABC Bank
+A/C: 1234567890
+IFSC: ABCD0123456</textarea></div>
+    <div class="field"><label>Notes</label><textarea id="notes" rows="3">Thank you for your business!</textarea></div>
+
+    <div style="margin-top:8px">
+      <button class="btn" id="renderBtn">Render Invoice</button>
+      <button class="btn" id="downloadPdf">Download PDF</button>
+      <button class="btn secondary" id="printBtn">Print</button>
+    </div>
+  </div>
+
+  <div id="invoicePreview" class="page">
+    <div class="invoice-header">
+      <div class="brand">
+        <img id="logoPreview" style="display:none;">
+        <div>
+          <h1 id="brandName">Innovative Hub</h1>
+          <div class="company-details" id="brandDetails"></div>
+        </div>
+      </div>
+      <div class="invoice-meta">
+        <div><strong>Tax Invoice</strong></div>
+        <div>Invoice: <span id="metaInvoiceNo"></span></div>
+        <div>Date: <span id="metaDate"></span></div>
+      </div>
+    </div>
+
+    <div class="addresses">
+      <div class="addr"><strong>Billing To:</strong><div id="billTo"></div></div>
+      <div class="addr"><strong></strong><div id="shipTo"></div></div>
+    </div>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th>SL</th><th>Product</th><th>GST %</th><th>Qty</th><th>Rate</th><th>Amount</th><th>CGST</th><th>SGST</th><th>Total</th>
+        </tr>
+      </thead>
+      <tbody id="itemsTableBody"></tbody>
+    </table>
+
+    <div class="totals">
+      <div class="box">
+        <div class="row"><div>Subtotal</div><div id="subtotal">₹0.00</div></div>
+        <div class="row"><div>Discount</div><div id="discountVal">₹0.00</div></div>
+        <div class="row"><div>Tax(18%)</div><div id="taxVal">₹0.00</div></div>
+        <div class="row total"><div>Grand Total</div><div id="grandTotal">₹0.00</div></div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div id="bankPreview"></div>
+      <div id="notesPreview"></div>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

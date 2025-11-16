@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Invoice Generator - A4 Printable</title>
+
+<!-- html2pdf bundle for PDF download -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+
+<style>
+  :root{
+    --page-width:210mm;
+    --page-height:297mm;
+    --margin:12mm;
+    --accent:#1e88e5;
+    --muted:#666;
+    --paper-bg: #fff;
+    --app-bg:#f3f5f7;
+    --page-shadow: 0 6px 24px rgba(0,0,0,0.12);
+  }
+
+  html,body{
+    height:100%;
+    margin:0;
+    font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+    background:var(--app-bg);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+
+  /* Workspace */
+  .container{
+    padding:24px;
+    display:flex;
+    gap:20px;
+    align-items:flex-start;
+    justify-content:center;
+  }
+
+  /* Editor column */
+  .controls{
+    width:360px;
+    max-height:calc(100vh - 48px);
+    overflow:auto;
+    background:#fff;
+    border-radius:10px;
+    padding:16px;
+    box-shadow:var(--page-shadow);
+  }
+  .controls h2{margin:6px 0 12px 0;font-size:18px}
+  .field{margin-bottom:10px}
+  .field label{display:block;font-weight:600;font-size:13px;margin-bottom:6px}
+  .field input[type="text"], .field input[type="number"], .field textarea, .field select{
+    width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:14px;
+  }
+  .small{display:flex;gap:8px}
+  .small input{flex:1}
+  .btn{display:inline-block;padding:8px 12px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-weight:600}
+  .btn.secondary{background:#555}
+  .muted{color:var(--muted);font-size:13px}
+
+  /* Invoice page (A4 look) */
+  .page{
+    width:calc(var(--page-width));
+    min-height:calc(var(--page-height));
+    background:var(--paper-bg);
+    box-shadow: var(--page-shadow);
+    padding:24mm 18mm;
+    box-sizing:border-box;
+    border-radius:6px;
+  }
+
+  /* Print styling */
+  @media print{
+    body{background:transparent}
+    .container{padding:0}
+    .controls{display:none}
+    .page{box-shadow:none;border-radius:0;margin:0;padding:12mm}
+  }
+
+  /* Header layout */
+  .invoice-header{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    align-items:flex-start;
+    border-bottom:2px solid #eee;
+    padding-bottom:12px;
+  }
+  .brand{
+    display:flex;gap:12px;align-items:center;
+  }
+  .brand img{height:72px; width:72px; object-fit:contain; background:#fff; border-radius:6px; border:1px solid #eee;}
+  .brand h1{margin:0;font-size:20px}
+  .company-details{font-size:13px;color:var(--muted)}
+  .invoice-meta{ text-align:right; font-size:13px }
+  .invoice-meta div{margin-bottom:6px}
+
+  /* Addresses and items */
+  .addresses{display:flex;gap:18px;margin-top:16px}
+  .addr{flex:1;font-size:13px}
+  .table{
+    width:100%;border-collapse:collapse;margin-top:16px;font-size:14px;
+  }
+  .table th, .table td{
+    padding:8px;border-bottom:1px solid #eee;text-align:left;
+  }
+  .table th{background:#fafafa;font-weight:700}
+  .table .num{text-align:right;min-width:90px}
+  .table .qty{width:80px;text-align:right}
+  .totals{margin-top:12px;display:flex;justify-content:flex-end}
+  .totals .box{width:320px}
+  .totals .row{display:flex;justify-content:space-between;padding:6px 0;font-size:14px}
+  .totals .row.total{font-weight:800;font-size:16px;border-top:2px solid #eee;padding-top:10px;margin-top:6px}
+
+  .footer{
+    margin-top:28px;font-size:13px;color:var(--muted);
+    display:flex;justify-content:space-between;align-items:center;
+  }
+
+  /* small helpers */
+  .muted-small{color:#777;font-size:12px;}
+  .add-line{display:inline-block;margin-top:8px;background:#f4f6f8;border:1px dashed #ddd;padding:6px 8px;border-radius:6px;cursor:pointer}
+
+  /* responsive */
+  @media (max-width:1100px){
+    .container{flex-direction:column;align-items:center}
+    .controls{width:95%}
+    .page{width:95%;min-height:auto}
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Controls -->
+  <div class="controls" aria-label="Invoice controls">
+    <h2>Invoice Editor</h2>
+
+    <div class="field">
+      <label>Upload Logo</label>
+      <input id="logoInput" type="file" accept="image/*">
+      <div class="muted-small">PNG/JPG. Appears top-left on invoice.</div>
+    </div>
+
+    <div class="field">
+      <label>Business / From - Name</label>
+      <input id="fromName" type="text" value="Innovative Hub">
+    </div>
+
+    <div class="field">
+      <label>Business Address / Contacts</label>
+      <textarea id="fromDetails" rows="3">Jagadanand Pati
+Innovative Hub
+Q Block - D, Bhubaneswar, Odisha
+Email: innovativehubofficial@gmail.com
+Phone: +91-7000000000</textarea>
+    </div>
+
+    <div class="field">
+      <label>Billing To - Client Name</label>
+      <input id="clientName" type="text" value="Client Name">
+    </div>
+    <div class="field">
+      <label>Client Address / Contact</label>
+      <textarea id="clientDetails" rows="3">Client Address Line 1
+City, State - PIN
+Phone/Email</textarea>
+    </div>
+
+    <div class="field small">
+      <div style="flex:1">
+        <label>Invoice No.</label>
+        <input id="invoiceNo" type="text" value="INV-001">
+      </div>
+      <div style="width:120px">
+        <label>Date</label>
+        <input id="invoiceDate" type="text" value="">
+      </div>
+    </div>
+
+    <div class="field small">
+      <div style="flex:1">
+        <label>Order No.</label>
+        <input id="orderNo" type="text" value="ORDER-1001">
+      </div>
+      <div style="width:120px">
+        <label>Due (days)</label>
+        <input id="dueDays" type="number" value="7">
+      </div>
+    </div>
+
+    <hr style="margin:12px 0">
+
+    <h3 style="font-size:15px;margin:6px 0">Items</h3>
+    <div id="itemsContainer"></div>
+
+    <div style="margin-top:8px;">
+      <button class="btn" id="addRow">+ Add Item</button>
+      <button class="btn secondary" id="clearRows" style="margin-left:8px">Clear</button>
+    </div>
+
+    <hr style="margin:12px 0">
+
+    <div class="field">
+      <label>Tax (%)</label>
+      <input id="taxPercent" type="number" value="18" min="0" step="0.01">
+    </div>
+
+    <div class="field">
+      <label>Discount (flat ₹)</label>
+      <input id="discount" type="number" value="0" min="0" step="0.01">
+    </div>
+
+    <div class="field">
+      <label>Bank / Payment Details</label>
+      <textarea id="bankDetails" rows="3">Bank Name: ABC Bank
+A/C: 1234567890
+IFSC: ABCD0123456
+UPI: yourid@upi</textarea>
+    </div>
+
+    <div class="field">
+      <label>Footer / Notes</label>
+      <textarea id="notes" rows="3">Thank you for your business!</textarea>
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+      <button class="btn" id="renderBtn">Render Invoice</button>
+      <button class="btn" id="downloadPdf">Download PDF</button>
+      <button class="btn secondary" id="printBtn">Print</button>
+    </div>
+
+    <div style="margin-top:14px" class="muted">
+      Tip: fill fields, add items, click <strong>Render Invoice</strong> to update preview. For best PDF results use Chrome/Edge.
+    </div>
+  </div>
+
+  <!-- Invoice preview (this is what will be printed / exported) -->
+  <div id="invoicePreview" class="page" aria-label="Invoice preview">
+    <div class="invoice-header">
+      <div class="brand">
+        <img id="logoPreview" src="" alt="logo" style="display:none;">
+        <div>
+          <h1 id="brandName">Innovative Hub</h1>
+          <div class="company-details" id="brandDetails">
+            Jagadanand Pati<br>
+            Innovative Hub<br>
+            Q Block - D, Bhubaneswar, Odisha<br>
+            Email: innovativehubofficial@gmail.com<br>
+            Phone: +91-7
+          </div>
+        </div>
+      </div>
+
+      <div class="invoice-meta">
+        <div><strong>Tax Invoice</strong></div>
+        <div>Invoice: <span id="metaInvoiceNo">INV-001</span></div>
+        <div>Date: <span id="metaDate">01-01-2025</span></div>
+        <div>Order: <span id="metaOrder">ORDER-1001</span></div>
+      </div>
+    </div>
+
+    <div class="addresses">
+      <div class="addr">
+        <strong>Billing Details</strong>
+        <div id="billTo">Client Name<br>Client Address</div>
+      </div>
+      <div class="addr">
+        <strong></strong>
+        <div id="shipTo">(If different) Shipping Address</div>
+      </div>
+    </div>
+
+    <table class="table" aria-label="Invoice items">
+      <thead>
+        <tr>
+          <th style="width:48px">SL</th>
+          <th>Description</th>
+          <th class="qty">Qty</th>
+          <th class="num">Rate (₹)</th>
+          <th class="num">Amount (₹)</th>
+        </tr>
+      </thead>
+      <tbody id="itemsTableBody">
+        <!-- rows inserted here -->
+      </tbody>
+    </table>
+
+    <div class="totals" aria-hidden="false">
+      <div class="box">
+        <div class="row"><div>Subtotal</div><div id="subtotal" class="num">₹0.00</div></div>
+        <div class="row"><div>Discount</div><div id="discountVal" class="num">₹0.00</div></div>
+        <div class="row"><div>Tax (<span id="taxPercentLabel">0</span>%)</div><div id="taxVal" class="num">₹0.00</div></div>
+        <div class="row total"><div>Total</div><div id="grandTotal" class="num">₹0.00</div></div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div>
+        <div id="bankPreview">Bank details here</div>
+      </div>
+      <div style="text-align:right">
+        <div id="notesPreview">Thank you for your business!</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------------------------
+  Invoice app logic
+----------------------------*/
+
+const L = selector => document.querySelector(selector);
+const format = n => {
+  // format currency with 2 decimals
+  const num = parseFloat(n||0);
+  return '₹' + num.toFixed(2);
+};
+
+/* initialize date field with today */
+const today = new Date();
+const dd = String(today.getDate()).padStart(2,'0');
+const mm = String(today.getMonth()+1).padStart(2,'0');
+const yyyy = today.getFullYear();
+L('#invoiceDate').value = dd + '-' + mm + '-' + yyyy;
+
+/* dynamic items */
+const itemsContainer = L('#itemsContainer');
+const itemsTableBody = L('#itemsTableBody');
+
+let items = [
+  {desc:"10k Ohm Potentiometer", qty:10, rate:7.63},
+  {desc:"Flex Sensor 2.2\" Bend Sensor for Hand Gesture", qty:5, rate:190.68}
+];
+
+function renderEditorRows(){
+  itemsContainer.innerHTML = '';
+  items.forEach((it, idx) => {
+    const div = document.createElement('div');
+    div.className = 'item-row';
+    div.style = 'display:flex;gap:8px;margin-bottom:8px;align-items:center';
+    div.innerHTML = `
+      <input data-idx="${idx}" class="desc" style="flex:1" type="text" value="${escapeHtml(it.desc)}" placeholder="Description">
+      <input data-idx="${idx}" class="qty" style="width:80px" type="number" min="0" step="1" value="${it.qty}">
+      <input data-idx="${idx}" class="rate" style="width:110px" type="number" min="0" step="0.01" value="${it.rate}">
+      <button class="btn" data-action="remove" data-idx="${idx}" style="padding:6px 8px">Remove</button>
+    `;
+    itemsContainer.appendChild(div);
+  });
+
+  // add quick add placeholder if empty
+  if(items.length === 0){
+    const div = document.createElement('div');
+    div.textContent = 'No items. Click "Add Item" to create new invoice lines.';
+    div.className = 'muted-small';
+    itemsContainer.appendChild(div);
+  }
+
+  // attach listeners
+  Array.from(itemsContainer.querySelectorAll('input.desc')).forEach(inp=>{
+    inp.addEventListener('change', e=>{
+      const i = +e.target.dataset.idx;
+      items[i].desc = e.target.value;
+    });
+  });
+  Array.from(itemsContainer.querySelectorAll('input.qty')).forEach(inp=>{
+    inp.addEventListener('change', e=>{
+      const i = +e.target.dataset.idx;
+      items[i].qty = parseFloat(e.target.value) || 0;
+    });
+  });
+  Array.from(itemsContainer.querySelectorAll('input.rate')).forEach(inp=>{
+    inp.addEventListener('change', e=>{
+      const i = +e.target.dataset.idx;
+      items[i].rate = parseFloat(e.target.value) || 0;
+    });
+  });
+  Array.from(itemsContainer.querySelectorAll('button[data-action="remove"]')).forEach(btn=>{
+    btn.addEventListener('click', e=>{
+      const i = +e.target.dataset.idx;
+      items.splice(i,1);
+      renderEditorRows();
+    });
+  });
+}
+
+function renderPreview(){
+  // brand
+  L('#brandName').textContent = L('#fromName').value || ' ';
+  L('#brandDetails').innerHTML = escapeHtml(L('#fromDetails').value).replace(/\n/g,'<br>');
+  // meta
+  L('#metaInvoiceNo').textContent = L('#invoiceNo').value || '';
+  L('#metaOrder').textContent = L('#orderNo').value || '';
+  L('#metaDate').textContent = L('#invoiceDate').value || '';
+  // client
+  L('#billTo').innerHTML = escapeHtml(L('#clientName').value) + '<br>' + escapeHtml(L('#clientDetails').value).replace(/\n/g,'<br>');
+  L('#shipTo').innerHTML = ''; // optional (could add shipping fields later)
+
+  // items table
+  itemsTableBody.innerHTML = '';
+  let subtotal = 0;
+  items.forEach((it, idx) => {
+    const amount = (parseFloat(it.qty) || 0) * (parseFloat(it.rate) || 0);
+    subtotal += amount;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${idx+1}</td>
+      <td>${escapeHtml(it.desc)}</td>
+      <td class="qty">${(it.qty||0)}</td>
+      <td class="num">${(parseFloat(it.rate)||0).toFixed(2)}</td>
+      <td class="num">${amount.toFixed(2)}</td>
+    `;
+    itemsTableBody.appendChild(tr);
+  });
+
+  // totals
+  const discount = parseFloat(L('#discount').value) || 0;
+  const taxPercent = parseFloat(L('#taxPercent').value) || 0;
+  const taxable = Math.max(0, subtotal - discount);
+  const taxVal = taxable * taxPercent / 100;
+  const grandTotal = taxable + taxVal;
+
+  L('#subtotal').textContent = format(subtotal);
+  L('#discountVal').textContent = format(discount);
+  L('#taxVal').textContent = format(taxVal);
+  L('#taxPercentLabel').textContent = taxPercent.toFixed(2);
+  L('#grandTotal').textContent = format(grandTotal);
+
+  L('#bankPreview').innerHTML = escapeHtml(L('#bankDetails').value).replace(/\n/g,'<br>');
+  L('#notesPreview').innerHTML = escapeHtml(L('#notes').value).replace(/\n/g,'<br>');
+}
+
+/* utility to escape HTML inserted from user */
+function escapeHtml(s){
+  if(!s && s!==0) return '';
+  return String(s).replace(/[&<>"']/g, function(m){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
+  });
+}
+
+/* add initial editor rows and render */
+renderEditorRows();
+renderPreview();
+
+/* add row button */
+L('#addRow').addEventListener('click', ()=>{
+  items.push({desc:'New Item', qty:1, rate:0});
+  renderEditorRows();
+});
+
+/* clear rows */
+L('#clearRows').addEventListener('click', ()=>{
+  if(confirm('Clear all items?')){ items = []; renderEditorRows(); renderPreview(); }
+});
+
+/* wire render button */
+L('#renderBtn').addEventListener('click', ()=>{
+  renderPreview();
+});
+
+/* live updates on some fields */
+['#fromName','#fromDetails','#clientName','#clientDetails','#invoiceNo','#invoiceDate','#orderNo','#taxPercent','#discount','#bankDetails','#notes'].forEach(sel=>{
+  L(sel).addEventListener('input', ()=> renderPreview());
+});
+
+/* logo upload preview */
+L('#logoInput').addEventListener('change', e=>{
+  const f = e.target.files && e.target.files[0];
+  if(!f) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    L('#logoPreview').src = ev.target.result;
+    L('#logoPreview').style.display = 'inline-block';
+  };
+  reader.readAsDataURL(f);
+});
+
+/* Print button */
+L('#printBtn').addEventListener('click', ()=>{
+  window.print();
+});
+
+/* Download PDF with html2pdf */
+L('#downloadPdf').addEventListener('click', async ()=>{
+  // ensure preview is rendered
+  renderPreview();
+
+  const element = document.getElementById('invoicePreview');
+
+  // html2pdf options for A4 and good quality
+  const opt = {
+    margin: [10/25.4, 12/25.4, 10/25.4, 12/25.4], // top,right,bottom,left in inches (converted mm/in)
+    filename: (L('#invoiceNo').value || 'invoice') + '.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, allowTaint: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  // Because html2pdf works by rendering the DOM, give it a tiny delay to ensure images load.
+  try{
+    await html2pdf().set(opt).from(element).save();
+  }catch(err){
+    alert('PDF generation failed: ' + err.message);
+  }
+});
+
+/* populate preview when page loads with defaults */
+document.addEventListener('DOMContentLoaded', ()=> renderPreview());
+</script>
+</body>
+</html>
